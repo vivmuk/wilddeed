@@ -15,7 +15,7 @@
     --surface:    #141A1F;
     --line:       color-mix(in srgb, #E9EDF0 12%, transparent);
     --ink:        #E9EDF0;
-    --ink-soft:   #A8B3BC;
+    --ink-soft:   #B6C0C8;
     --accent:     #FF6B35;
     --accent-ink: #0B0E11;
     --display: "Outfit", system-ui, sans-serif;
@@ -50,6 +50,7 @@
     letter-spacing: -0.02em; margin: 8px 0 6px; text-wrap: balance;
   }
   .sub { color: var(--ink-soft); font-size: 15.5px; margin: 0 0 24px; }
+  .step-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 26px 0 8px; }
 
   .step { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
   .step b { color: var(--accent); font-weight: 500; }
@@ -124,7 +125,8 @@
   <div class="readout" id="out" aria-live="polite">
     <div class="readout__line"><span class="readout__k">status</span><span class="readout__v">waiting for an address<span class="cursor"></span></span></div>
   </div>
-  <p class="hint" id="step2-hint" hidden><b style="color:var(--accent)">Step 2</b> · that's the real record, straight from GBIF. Happy with it? Generate the full dossier below.</p>
+  <p class="step" id="step2-label" hidden style="margin-top: 26px"><b>Step 2</b> · the live result</p>
+  <p class="hint" id="step2-hint" hidden>That's the real record, straight from GBIF. Happy with it? Generate the full dossier below.</p>
 
   <div class="divider">or</div>
 
@@ -188,6 +190,7 @@ document.getElementById("f").addEventListener("submit", async (ev) => {
       ["top observed", top || "none listed in radius"],
     ]);
     step2.hidden = false;
+    document.getElementById("step2-label").hidden = false;
     genBtn.disabled = false;
   } catch (e) {
     out.innerHTML = rows([
