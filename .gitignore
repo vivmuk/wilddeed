@@ -1,0 +1,16 @@
+# Secrets
+.env
+*.key
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Reports contain per-parcel generated deliverables (sample dossiers live in releases, not git)
+reports/*.pdf
+reports/*.png
+
+# OS / editor
+.DS_Store
+Thumbs.db

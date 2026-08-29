@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WildDeed — A naturalist's background check for any piece of land</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231F2620'/%3E%3Cpath d='M16 6c-5 3-8 7-8 11a8 8 0 0016 0c0-4-3-8-8-11z' fill='%239A5B2B'/%3E%3C/svg%3E">
+<meta name="description" content="An AI-generated wildlife dossier for any US land parcel. Real GBIF occurrence data, IUCN conservation status, a naturalist's narrative. In three minutes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sc-canvas: #F4EFE4;        /* bone paper */
+  --sc-surface: #EAE3D2;       /* deeper paper */
+  --sc-ink: #1F2620;           /* forest ink */
+  --sc-ink-soft: #5A6156;      /* sage-grey, tinted not flat */
+  --sc-accent: #9A5B2B;        /* muted amber sepia */
+  --sc-accent-ink: #F7F2E7;
+  --sc-font-display: "Fraunces", Georgia, serif;
+  --sc-font-text: "Alegreya Sans", system-ui, sans-serif;
+}
+/* chapter grounds - hard cuts, no drift (chaptered grammar) */
+.wd-ch--paper   { --sc-canvas: #F4EFE4; --sc-ink: #1F2620; --sc-ink-soft: #5A6156; background: var(--sc-canvas); color: var(--sc-ink); }
+.wd-ch--forest  { --sc-canvas: #22301F; --sc-ink: #EFEBDD; --sc-ink-soft: #A9B2A0; background: var(--sc-canvas); color: var(--sc-ink); }
+.wd-ch--night   { --sc-canvas: #1B2320; --sc-ink: #EAE6D8; --sc-ink-soft: #9AA497; background: var(--sc-canvas); color: var(--sc-ink); }
+.wd-ch--dusk    { --sc-canvas: #2C2A24; --sc-ink: #F0EBDC; --sc-ink-soft: #A8A392; background: var(--sc-canvas); color: var(--sc-ink); }
+</style>
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+/* ============ WildDeed chaptered layout ============ */
+
+/* Folio nav: left margin rail, updates per chapter, clickable */
+.wd-folio {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: clamp(180px, 16vw, 240px);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 1.4rem 0 1.6rem;
+  border-right: 1px solid color-mix(in srgb, var(--sc-ink) 14%, transparent);
+  z-index: 40;
+  background: inherit;
+  visibility: hidden;
+}
+@media (min-width: 1080px) { .wd-folio { visibility: visible; } }
+.wd-folio__brand {
+  font-family: var(--sc-font-display);
+  font-weight: 600; font-size: 1.06rem; letter-spacing: .01em;
+  margin-bottom: 2.2rem; display: block; text-decoration: none; color: inherit;
+}
+.wd-folio__brand em { font-style: italic; color: var(--sc-accent); }
+.wd-folio ol { list-style: none; margin: 0; padding: 0; }
+.wd-folio li { margin: 0; }
+.wd-folio a {
+  display: block; padding: .38rem 0;
+  color: var(--sc-ink-soft); text-decoration: none;
+  font-size: .8rem; letter-spacing: .04em;
+  border-left: 2px solid transparent; padding-left: .7rem; margin-left: -.72rem;
+  transition: color .16s var(--sc-ease-out, ease-out), border-color .16s var(--sc-ease-out, ease-out);
+}
+.wd-folio a:hover { color: var(--sc-ink); }
+.wd-folio a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+.wd-folio a[aria-current="true"] {
+  color: var(--sc-ink); font-weight: 500;
+  border-left-color: var(--sc-accent);
+}
+.wd-folio__meta {
+  margin-top: 2.4rem; font-size: .72rem; color: var(--sc-ink-soft);
+  letter-spacing: .03em; line-height: 1.5;
+}
+
+/* The field ledger: right margin tally rail (signature move) */
+.wd-ledger {
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: clamp(150px, 13vw, 200px);
+  padding: 1.6rem 1.3rem;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  border-left: 1px dashed color-mix(in srgb, var(--sc-ink) 22%, transparent);
+  z-index: 40; visibility: hidden;
+  font-family: var(--sc-font-text);
+}
+@media (min-width: 1080px) { .wd-ledger { visibility: visible; } }
+.wd-ledger__title {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--sc-ink-soft); margin-bottom: 1rem;
+}
+.wd-ledger__row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: .42rem 0; font-size: .78rem;
+  color: var(--sc-ink-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--sc-ink) 10%, transparent);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .5s var(--sc-ease-out, ease-out), transform .5s var(--sc-ease-out, ease-out);
+}
+.wd-ledger__row.is-stamped { opacity: 1; transform: none; color: var(--sc-ink); }
+.wd-ledger__row.is-stamped .wd-ledger__n { color: var(--sc-accent); font-weight: 700; }
+.wd-ledger__n { font-variant-numeric: tabular-nums; }
+.wd-ledger__sum {
+  margin-top: 1rem; font-size: .78rem; color: var(--sc-ink-soft);
+  opacity: 0; transition: opacity .6s var(--sc-ease-out, ease-out);
+}
+.wd-ledger__sum.is-stamped { opacity: 1; }
+.wd-ledger__sum strong { color: var(--sc-accent); font-variant-numeric: tabular-nums; }
+
+/* Page column between the rails */
+.wd-main { margin: 0 auto; max-width: 46rem; padding: 0 clamp(1.2rem, 4vw, 3rem); }
+@media (min-width: 1080px) {
+  .wd-main { margin-left: clamp(180px, 16vw, 240px); margin-right: clamp(150px, 13vw, 200px); max-width: none; padding: 0 clamp(2rem, 5vw, 5rem); }
+}
+
+/* Title page */
+.wd-title { min-height: 92svh; display: flex; flex-direction: column; padding-top: clamp(3rem, 9vh, 6rem); }
+.wd-title__eyebrow { font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; color: var(--sc-accent); margin: 0 0 1.6rem; }
+.wd-title h1 {
+  font-family: var(--sc-font-display); font-weight: 500;
+  font-size: clamp(2.6rem, 7.2vw, 5.4rem);
+  line-height: 1.02; letter-spacing: -0.015em; text-wrap: balance;
+  margin: 0 0 1.4rem; max-width: 14ch;
+}
+.wd-title h1 em { font-style: italic; color: var(--sc-accent); }
+.wd-title__sub { font-size: 1.12rem; line-height: 1.55; color: var(--sc-ink-soft); max-width: 34ch; margin: 0; }
+.wd-title__fig { margin: auto 0 0; padding: 2rem 0 1.4rem; }
+.wd-title__fig img { width: 100%; height: auto; display: block; }
+.wd-title__fig figcaption { font-size: .74rem; color: var(--sc-ink-soft); letter-spacing: .06em; margin-top: .7rem; }
+
+/* Chapters */
+.wd-chapter { padding: clamp(4.5rem, 12vh, 8rem) 0; }
+.wd-chapter__no {
+  font-family: var(--sc-font-display); font-style: italic;
+  font-size: .95rem; color: var(--sc-accent);
+  margin: 0 0 1rem; letter-spacing: .06em;
+}
+.wd-chapter h2 {
+  font-family: var(--sc-font-display); font-weight: 500;
+  font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+  line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance;
+  margin: 0 0 1.6rem; max-width: 18ch;
+}
+.wd-lede { font-size: 1.14rem; line-height: 1.6; max-width: 58ch; margin: 0 0 1.2rem; }
+.wd-body { font-size: 1rem; line-height: 1.65; max-width: 58ch; margin: 0 0 1rem; color: color-mix(in srgb, var(--sc-ink) 88%, var(--sc-canvas)); }
+.wd-note { font-size: .84rem; color: var(--sc-ink-soft); border-top: 1px solid color-mix(in srgb, var(--sc-ink) 16%, transparent); padding-top: 1rem; max-width: 58ch; }
+
+/* media figures inside chapters */
+.wd-fig { margin: 2.6rem 0; }
+.wd-fig img { width: 100%; height: auto; display: block; }
+.wd-fig figcaption { font-size: .76rem; color: var(--sc-ink-soft); letter-spacing: .05em; margin-top: .6rem; }
+
+/* ch1 spread: land plate with parallax column */
+.wd-spread { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: end; }
+@media (min-width: 860px) { .wd-spread { grid-template-columns: 7fr 5fr; gap: 3rem; } }
+.wd-spread__media { position: relative; }
+.wd-spread__media img { width: 100%; height: auto; display: block; }
+
+/* ch2: the question, quiet act, no imagery */
+.wd-question {
+  font-family: var(--sc-font-display); font-weight: 400;
+  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  line-height: 1.22; letter-spacing: 0; text-wrap: balance;
+  max-width: 22ch; margin: 0 0 2.4rem;
+}
+.wd-question em { font-style: italic; color: var(--sc-accent); }
+
+/* ch3: journal spread, plates leafed */
+.wd-plates { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin: 2.6rem 0; }
+@media (max-width: 640px) { .wd-plates { grid-template-columns: 1fr; } }
+.wd-plates figure { margin: 0; }
+.wd-plates img { width: 100%; height: auto; display: block; }
+
+/* ch4 PEAK: crane act - biggest visual change, most room */
+.wd-peak { padding: clamp(6rem, 16vh, 11rem) 0; position: relative; }
+.wd-peak__fig { margin: 0 0 2.2rem; }
+.wd-peak__fig img { width: 100%; height: auto; display: block; }
+.wd-peak h2 {
+  font-family: var(--sc-font-display); font-weight: 500;
+  font-size: clamp(2.2rem, 5.6vw, 4rem); line-height: 1.04;
+  letter-spacing: -0.015em; text-wrap: balance; margin: 0 0 1.4rem; max-width: 16ch;
+}
+.wd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin: 2.2rem 0 0; padding: 0; list-style: none; }
+@media (max-width: 640px) { .wd-stats { grid-template-columns: 1fr 1fr; } }
+.wd-stat { border-top: 1px solid color-mix(in srgb, var(--sc-ink) 22%, transparent); padding-top: .8rem; }
+.wd-stat__n { font-family: var(--sc-font-display); font-size: clamp(1.8rem, 3.6vw, 2.6rem); font-weight: 500; line-height: 1; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+.wd-stat__label { display: block; font-size: .76rem; letter-spacing: .05em; color: var(--sc-ink-soft); margin-top: .5rem; }
+
+/* ch5: method + ledger figures */
+.wd-method li { margin: 0 0 1.1rem; max-width: 58ch; }
+.wd-method { padding-left: 1.1rem; }
+.wd-method strong { color: var(--sc-accent); font-weight: 700; }
+
+/* colophon close */
+.wd-colophon { padding: clamp(5rem, 14vh, 9rem) 0 4rem; }
+.wd-colophon__rule { border: 0; border-top: 1px solid color-mix(in srgb, var(--sc-ink) 25%, transparent); margin: 0 0 2.6rem; max-width: 58ch; }
+.wd-cta-line {
+  font-family: var(--sc-font-display); font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 500; line-height: 1.3; max-width: 30ch; margin: 0 0 2.6rem;
+}
+.wd-cta-line a {
+  color: var(--sc-accent); text-decoration: underline;
+  text-decoration-thickness: 1.5px; text-underline-offset: 5px;
+  transition: color .15s var(--sc-ease-out, ease-out);
+}
+.wd-cta-line a:hover { color: var(--sc-ink); }
+.wd-cta-line a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; border-radius: 2px; }
+.wd-colophon__small { font-size: .78rem; color: var(--sc-ink-soft); line-height: 1.6; max-width: 60ch; }
+.wd-colophon__small + .wd-colophon__small { margin-top: .8rem; }
+
+/* mobile inline ledger totals (signature move, phone form) */
+.wd-inline-sum {
+  display: flex; flex-wrap: wrap; gap: .4rem 1.6rem;
+  border-top: 1px dashed color-mix(in srgb, var(--sc-ink) 25%, transparent);
+  padding-top: 1rem; margin-top: 1.6rem;
+  font-size: .8rem; color: var(--sc-ink-soft);
+}
+@media (min-width: 1080px) { .wd-inline-sum { display: none; } }
+.wd-inline-sum span b { color: var(--sc-accent); font-variant-numeric: tabular-nums; }
+
+/* reveal wrapper padding for descenders (devices.md 4) */
+.wd-figure-wrap { padding: .12em .08em; }
+</style>
+</head>
+<body class="wd-ch--paper">
+
+<!-- Folio nav (left margin) -->
+<nav class="wd-folio wd-ch--paper" aria-label="Chapters" id="folio">
+  <a class="wd-folio__brand" href="#title">Wild<em>Deed</em></a>
+  <ol>
+    <li><a href="#ch1" data-folio="ch1">I · The Land</a></li>
+    <li><a href="#ch2" data-folio="ch2">II · The Question</a></li>
+    <li><a href="#ch3" data-folio="ch3">III · The Dossier</a></li>
+    <li><a href="#ch4" data-folio="ch4">IV · The Record</a></li>
+    <li><a href="#ch5" data-folio="ch5">V · The Method</a></li>
+    <li><a href="#close" data-folio="close">VI · Colophon</a></li>
+  </ol>
+  <p class="wd-folio__meta">A naturalist's background check for any piece of land.</p>
+</nav>
+
+<!-- Field ledger (right margin, signature move) -->
+<aside class="wd-ledger wd-ch--paper" aria-label="Field ledger for this chapter" id="ledger">
+  <p class="wd-ledger__title">Field ledger</p>
+  <div class="wd-ledger__row" data-stamp="ch1"><span>Acres scanned</span><span class="wd-ledger__n">3,100</span></div>
+  <div class="wd-ledger__row" data-stamp="ch2"><span>Radius</span><span class="wd-ledger__n">8 km</span></div>
+  <div class="wd-ledger__row" data-stamp="ch3"><span>Species</span><span class="wd-ledger__n">518</span></div>
+  <div class="wd-ledger__row" data-stamp="ch4"><span>Eagle records</span><span class="wd-ledger__n">42</span></div>
+  <div class="wd-ledger__row" data-stamp="ch4b"><span>Crane records</span><span class="wd-ledger__n">7</span></div>
+  <div class="wd-ledger__row" data-stamp="ch5"><span>Observations</span><span class="wd-ledger__n">92,840</span></div>
+  <p class="wd-ledger__sum" data-stamp="close">Total examined: <strong>92,840</strong> records, <strong>15</strong> years, one parcel.</p>
+</aside>
+
+<main class="wd-main">
+
+  <!-- TITLE PAGE (chaptered hero: type on paper, media starts in ch1) -->
+  <section class="wd-title sc-section" id="title">
+    <p class="wd-title__eyebrow" data-sc-in>WildDeed · Parcel Wildlife Dossier</p>
+    <h1 data-sc-kinetic="lines">A naturalist's background check for any piece of land.</h1>
+    <p class="wd-title__sub" data-sc-in>Every US parcel has a wildlife record. We find it, read it, and hand you the dossier in three minutes.</p>
+    <figure class="wd-title__fig wd-figure-wrap" data-sc-reveal="up" data-sc-reveal-at="0.1 0.6">
+      <img src="static/img/hero-survey.webp" width="1600" height="890" alt="Hand-painted survey plat of a rural land parcel in watercolor" decoding="async">
+      <figcaption>Sample plat, Wood County, Wisconsin. Radius 8 km, records 2011 to 2026.</figcaption>
+    </figure>
+  </section>
+
+  <!-- CHAPTER I: The Land (recognition) -->
+  <section class="wd-chapter wd-ch--forest sc-section" id="ch1" data-verify-ground="forest">
+    <p class="wd-chapter__no" data-sc-in>Chapter I</p>
+    <h2 data-sc-kinetic="lines">The land you are about to buy has a file.</h2>
+    <div class="wd-spread">
+      <div class="wd-spread__media">
+        <figure class="wd-figure-wrap" data-sc-reveal="up" data-sc-reveal-at="0.15 0.6">
+          <img src="static/img/ch1-land.webp" width="1600" height="890" alt="Central Wisconsin hunting parcel at first light, tamarack swamp and creek in watercolor" data-sc-parallax="-0.6" decoding="async">
+        </figure>
+      </div>
+      <div class="sc-stack" data-sc-stagger="60">
+        <p class="wd-lede" data-sc-in>Before you sign anything, the birds, game, and rare species around that parcel have already been counted, by thousands of field observers, for decades.</p>
+        <p class="wd-body" data-sc-in>Take one real parcel in central Wisconsin. Within eight kilometers of its fence line: 92,840 wildlife observations across 518 species, logged between 2011 and 2026 by birders, biologists, and hunters with phones.</p>
+        <p class="wd-body" data-sc-in>That file exists for nearly every parcel in the country. Nobody reads it. We do.</p>
+        <div class="wd-inline-sum"><span>Acres scanned <b>3,100</b></span><span>Radius <b>8 km</b></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER II: The Question (unease, no imagery) -->
+  <section class="wd-chapter wd-ch--night sc-section" id="ch2" data-verify-ground="night">
+    <p class="wd-chapter__no" data-sc-in>Chapter II</p>
+    <h2 class="wd-question" data-sc-kinetic="lines">The seller says the hunting is <em>excellent.</em> Who checked?</h2>
+    <div class="sc-stack" data-sc-stagger="70">
+      <p class="wd-body" data-sc-in>Listing photos show the food plot, not the population. The agent's brochure says "abundant whitetail," and it might be true, but it is marketing copy written by the person whose commission depends on the sale.</p>
+      <p class="wd-body" data-sc-in>Land is a five and six figure purchase decided on vibes and a walk in August, when half the species that matter are elsewhere.</p>
+      <p class="wd-note" data-sc-in>A wildlife dossier does not tell you what to buy. It tells you what the record actually says, so the decision is yours, informed.</p>
+    </div>
+  </section>
+
+  <!-- CHAPTER III: The Dossier (curiosity, plates leafed) -->
+  <section class="wd-chapter wd-ch--paper sc-section" id="ch3" data-verify-ground="paper">
+    <p class="wd-chapter__no" data-sc-in>Chapter III</p>
+    <h2 data-sc-kinetic="lines">What a dossier holds.</h2>
+    <p class="wd-lede" data-sc-in>Seven pages, plain English, one parcel. Written by an AI naturalist from the occurrence data, never around it.</p>
+    <div class="wd-plates">
+      <figure class="wd-figure-wrap" data-sc-reveal="left" data-sc-reveal-at="0.2 0.7">
+        <img src="static/img/ch2-dossier.webp" width="1600" height="890" alt="Open naturalist field journal with a painted white-tailed deer plate" decoding="async">
+        <figcaption class="wd-fig figcaption" style="font-size:.76rem;color:var(--sc-ink-soft);letter-spacing:.05em;margin-top:.6rem;">Flagship profiles: counts, last seen, status.</figcaption>
+      </figure>
+      <figure class="wd-figure-wrap" data-sc-reveal="right" data-sc-reveal-at="0.2 0.7">
+        <img src="static/img/ch4-plates.webp" width="1600" height="890" alt="Naturalist study wall with a dominant bald eagle plate and smaller species sketches" data-sc-parallax="-0.5" decoding="async">
+        <figcaption style="font-size:.76rem;color:var(--sc-ink-soft);letter-spacing:.05em;margin-top:.6rem;">Every species, one line, one badge.</figcaption>
+      </figure>
+    </div>
+    <div class="sc-stack" data-sc-stagger="60">
+      <p class="wd-body" data-sc-in>An executive verdict in plain English. Habitat and landscape context. Flagship species with observation counts and last seen years. A game and harvest section that is the reason brokers keep these on file. Conservation notes with the uncomfortable parts left in.</p>
+      <p class="wd-body" data-sc-in>And a data appendix: sources, radius, record counts, freshness, and an explicit note that this is not a biological survey. Honesty is the product.</p>
+      <div class="wd-inline-sum"><span>Species <b>518</b></span></div>
+    </div>
+  </section>
+
+  <!-- CHAPTER IV: The Record (PEAK: crane, iris reveal, real counts) -->
+  <section class="wd-peak wd-ch--forest sc-section" id="ch4" data-verify-ground="forest-peak">
+    <p class="wd-chapter__no" data-sc-in>Chapter IV</p>
+    <figure class="wd-peak__fig wd-figure-wrap" data-sc-reveal="iris" data-sc-reveal-at="0.05 0.65">
+      <img src="static/img/ch3-crane.webp" width="1600" height="890" alt="Whooping crane standing in shallow wetland at dawn, painted in naturalist watercolor" decoding="async">
+    </figure>
+    <h2 data-sc-kinetic="lines">Seven whooping crane records, inside the radius.</h2>
+    <p class="wd-lede" data-sc-in>Grus americana. Endangered, federally protected, roughly six hundred alive in the wild. The sample parcel's dossier carries seven recent records, because its wetlands sit under a migration corridor nobody mentioned in the listing.</p>
+    <ul class="wd-stats">
+      <li class="wd-stat" data-sc-in><span class="wd-stat__n">42</span><span class="wd-stat__label">Bald eagle records, last seen 2026</span></li>
+      <li class="wd-stat" data-sc-in><span class="wd-stat__n">39</span><span class="wd-stat__label">White-tailed deer records</span></li>
+      <li class="wd-stat" data-sc-in><span class="wd-stat__n">7</span><span class="wd-stat__label">Whooping crane records, endangered</span></li>
+    </ul>
+    <div class="wd-inline-sum"><span>Eagle records <b>42</b></span><span>Crane records <b>7</b></span></div>
+  </section>
+
+  <!-- CHAPTER V: The Method (trust) -->
+  <section class="wd-chapter wd-ch--dusk sc-section" id="ch5" data-verify-ground="dusk">
+    <p class="wd-chapter__no" data-sc-in>Chapter V</p>
+    <h2 data-sc-kinetic="lines">Where the numbers come from.</h2>
+    <ol class="wd-method sc-stack" data-sc-stagger="70">
+      <li data-sc-in><strong>GBIF.</strong> The Global Biodiversity Information Facility, the scientific record of every museum specimen, birder checklist, and agency survey. 92,840 records pulled for the sample parcel alone.</li>
+      <li data-sc-in><strong>The IUCN Red List.</strong> Conservation status for every flagship species, from Least Concern to Endangered, as a badge on the page.</li>
+      <li data-sc-in><strong>An AI naturalist that cannot invent.</strong> The narrative is generated from the structured data, then validated: every species name in the prose must appear in the source records or the build fails.</li>
+      <li data-sc-in><strong>An honest appendix.</strong> Radius, date window, record counts, and the disclaimer, on every report. Not a biological survey. A reading of the public record.</li>
+    </ol>
+    <div class="wd-inline-sum"><span>Observations <b>92,840</b></span></div>
+  </section>
+
+  <!-- COLOPHON (resolve: quiet close, running-text CTA) -->
+  <section class="wd-colophon wd-ch--night sc-section" id="close" data-verify-ground="night-close">
+    <p class="wd-chapter__no" data-sc-in>Colophon</p>
+    <hr class="wd-colophon__rule" data-sc-in>
+    <p class="wd-cta-line" data-sc-in>Three minutes from address to dossier. <a href="mailto:hello@wilddeed.example?subject=Dossier%20order%3A%20address%20and%20radius">Order a dossier</a> and read your land the way a naturalist would.</p>
+    <figure class="wd-fig wd-figure-wrap" data-sc-reveal="up" data-sc-reveal-at="0.1 0.6">
+      <img src="static/img/ch5-verdict.webp" width="1600" height="890" alt="Two figures at the edge of a dusk savanna, deer grazing at the distant treeline" decoding="async">
+    </figure>
+    <p class="wd-colophon__small" data-sc-in>WildDeed dossiers are generated from public biodiversity records (GBIF) and IUCN conservation data. Not a biological survey; not a guarantee of species presence. For land-use decisions, consult a licensed biologist.</p>
+    <p class="wd-colophon__small" data-sc-in>Sample parcel: Wood County, Wisconsin. 8 km radius, records 2011 to 2026. Bald eagle 42 · Whitetail 39 · Wood duck 28 · Whooping crane 7 (endangered).</p>
+  </section>
+
+</main>
+
+<script src="scrollcraft.js"></script>
+<script>
+ScrollCraft.mount(document);
+/* WildDeed page-local behaviour (engine untouched):
+   1. folio nav updates by chapter in view (also aria-current for a11y)
+   2. field ledger stamps when its chapter's data claim passes (signature move)
+   Both driven from IntersectionObserver, not engine state. */
+(function () {
+  var chapters = [
+    { id: 'title', no: null },
+    { id: 'ch1', no: 'ch1', ground: 'paper' },
+    { id: 'ch2', no: 'ch2', ground: 'night' },
+    { id: 'ch3', no: 'ch3', ground: 'paper' },
+    { id: 'ch4', no: 'ch4', ground: 'forest-peak' },
+    { id: 'ch5', no: 'ch5', ground: 'dusk' },
+    { id: 'close', no: 'close', ground: 'night-close' }
+  ];
+  var folio = document.getElementById('folio');
+  var ledger = document.getElementById('ledger');
+  var links = {};
+  folio.querySelectorAll('a[data-folio]').forEach(function (a) { links[a.getAttribute('data-folio')] = a; });
+
+  function setGround(name) {
+    var g = 'wd-ch--paper';
+    if (name === 'night' || name === 'night-close') g = 'wd-ch--night';
+    if (name === 'forest' || name === 'forest-peak') g = 'wd-ch--forest';
+    if (name === 'dusk') g = 'wd-ch--dusk';
+    [folio, ledger].forEach(function (el) {
+      el.classList.remove('wd-ch--paper', 'wd-ch--forest', 'wd-ch--night', 'wd-ch--dusk');
+      el.classList.add(g);
+    });
+  }
+
+  var stamped = {};
+  function stamp(key) {
+    if (stamped[key]) return;
+    stamped[key] = true;
+    ledger.querySelectorAll('[data-stamp="' + key + '"]').forEach(function (r) {
+      r.classList.add('is-stamped');
+    });
+  }
+
+  var current = null;
+  function setCurrent(id) {
+    if (current === id) return;
+    current = id;
+    var ch = chapters.find(function (c) { return c.id === id; });
+    Object.keys(links).forEach(function (k) {
+      links[k].setAttribute('aria-current', String(k === (ch && ch.no)));
+    });
+    if (ch && ch.ground) setGround(ch.ground);
+    if (ch && ch.no) stamp(ch.no);
+    if (id === 'ch4') stamp('ch4b');
+    if (id === 'close') stamp('close');
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    var best = null;
+    entries.forEach(function (e) {
+      if (e.isIntersecting && (!best || e.intersectionRatio > best.intersectionRatio)) best = e;
+    });
+    if (best) setCurrent(best.target.id);
+  }, { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.25, 0.5] });
+  chapters.forEach(function (c) {
+    var el = document.getElementById(c.id);
+    if (el) observer.observe(el);
+  });
+
+  /* relayout for worldflight-style measurement (safe here too) */
+  function relayout() { dispatchEvent(new Event('resize')); }
+  addEventListener('load', relayout);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
+})();
+</script>
+</body>
+</html>
