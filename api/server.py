@@ -10,6 +10,7 @@ Endpoints:
 """
 import os, sys, uuid, threading, time, pathlib, datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
@@ -22,6 +23,16 @@ DB_URL = os.environ.get("DATABASE_URL", "")
 JOBS = {}
 
 app = FastAPI(title="WildDeed", version="0.1.0")
+
+# The landing page runs the console against this API from any origin (localhost
+# previews, the Railway domain, future custom domains). Everything on it is
+# public read-only data, so allow all origins.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
 
 class Order(BaseModel):
     address: str = Field(..., min_length=4)
