@@ -43,26 +43,43 @@ class QuickQuery(BaseModel):
     address: str
     radius: int = Field(8, ge=1, le=25)
 
+# Per-job progress hook: generate_report calls it with (stage_key, message) as it
+# advances; we mirror it into JOBS so GET /api/dossiers/{id} can report live stage.
+STAGE_HOOK = {}
+
+def _make_hook(job_id: str):
+    def hook(stage_key: str, message: str = ""):
+        job = JOBS.get(job_id)
+        if job is not None:
+            job.update(stage=stage_key, stage_msg=message, stage_t=time.time())
+    return hook
+
 def run_job(job_id: str, order: Order):
     job = JOBS[job_id]
     job.update(status="running", started=time.time())
+    STAGE_HOOK[job_id] = _make_hook(job_id)
     try:
         # Geocode HERE (Census -> Nominatim fallback) instead of inside generate_report:
         # the engine's geocoder has no rural fallback and exits hard (SystemExit) on no-match.
+        job.update(stage="geocoding", stage_i=1)
         geo = geocode_any(order.address)
         if not geo:
             raise RuntimeError("address not found (Census and Nominatim both returned no match)")
         job.update(geo={"lat": geo["lat"], "lng": geo["lng"], "matched": geo.get("matched_address")})
+        job.update(stage="gbif search", stage_i=2)
         result = wilddeed.generate_report(
             address=None,  # skip internal geocoding; pass coords directly
             lat=geo["lat"], lng=geo["lng"],
             radius_km=order.radius,
             title=order.title or order.address,
             out_dir=str(ROOT / "reports"),
+            on_progress=STAGE_HOOK[job_id],
         )
         job.update(status="done", finished=time.time(), **result)
     except BaseException as e:  # SystemExit and friends must not silently kill the worker
         job.update(status="error", error=f"{type(e).__name__}: {e}", finished=time.time())
+    finally:
+        STAGE_HOOK.pop(job_id, None)
 
 @app.post("/api/dossiers")
 def create_dossier(order: Order):

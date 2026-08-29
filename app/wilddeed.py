@@ -786,7 +786,17 @@ def render_pdf(payload: dict, narr: dict, cover_path: Path, out_pdf: Path) -> Pa
 
 def generate_report(address: str = None, lat: float = None, lng: float = None,
                     radius_km: int = DEFAULT_RADIUS_KM, out_dir: str = None,
-                    skip_image: bool = False, title: str = None) -> dict:
+                    skip_image: bool = False, title: str = None,
+                    on_progress=None) -> dict:
+    """on_progress, when given, is called as on_progress(stage_key, human_message)
+    at each pipeline stage so callers (the API layer) can expose live status."""
+    def progress(key, msg=""):
+        if on_progress:
+            try:
+                on_progress(key, msg)
+            except Exception:
+                pass
+
     import os
     global VENICE_KEY
     VENICE_KEY = VENICE_KEY or os.environ.get("VENICE_API_KEY")
@@ -797,6 +807,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
     # 1. geocode
     if address and (lat is None or lng is None):
         log(f"geocoding: {address}")
+        progress("geocoding", "resolving the address")
         geo = geocode_census(address)
         if not geo:
             raise SystemExit(f"Could not geocode address: {address}")
@@ -807,6 +818,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
     log(f"location: {matched} ({lat:.4f}, {lng:.4f})")
 
     # 2. GBIF
+    progress("gbif", f"querying GBIF within {radius_km} km")
     min_year = date.today().year - DEFAULT_YEARS
     gbif = gbif_search(lat, lng, radius_km, min_year)
     if not gbif["records"]:
@@ -818,6 +830,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
     species = normalize_records(gbif["records"])
     species.sort(key=lambda s: -s["count"])
     log(f"normalized to {len(species)} species")
+    progress("identify", f"{gbif['total']:,} records · {len(species)} species found")
 
     # IUCN from records (single pass — cheap and accurate for present taxa)
     iucn_by_sci = {}
@@ -830,6 +843,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
         s["iucn"] = iucn_by_sci.get(s["scientificName"])
 
     # 4. rank
+    progress("rank", "ranking the notable species")
     flagships = rank_flagships(species)
     # add threatened
     for s in species:
@@ -861,6 +875,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
 
     # 5. LLM narrative
     log("writing narrative (Venice LLM)...")
+    progress("narrative", "writing the naturalist's narrative")
     data_str = build_llm_data(payload)
     raw = venice_chat([{"role": "user",
                         "content": NARRATIVE_PROMPT.replace("{data}", data_str)}],
@@ -878,6 +893,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
     # 6. cover art
     cover_path = None
     if not skip_image:
+        progress("cover", "painting the cover plate")
         sig = flagships[0] if flagships else None
         sig_name = (sig["commonName"] or sig["scientificName"]) if sig else "North American woodland"
         try:
@@ -888,6 +904,7 @@ def generate_report(address: str = None, lat: float = None, lng: float = None,
             log(f"cover art failed: {e}")
 
     # 7. PDF
+    progress("pdf", "binding the dossier")
     out_dir_path = Path(out_dir) if out_dir else Path("reports")
     out_pdf = out_dir_path / f"wilddeed-{payload['report_id']}.pdf"
     render_pdf(payload, narr, cover_path, out_pdf)
