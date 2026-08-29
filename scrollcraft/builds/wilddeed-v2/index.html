@@ -3,499 +3,242 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>WildDeed · the wildlife record of any piece of land, run live</title>
-<meta name="description" content="Type a US address, get the real biodiversity record back in seconds, and generate a 7-page naturalist's dossier from GBIF and IUCN data.">
+<title>WildDeed · run a wildlife lookup on any piece of land</title>
+<meta name="description" content="Type a US address, get the real biodiversity record back in seconds, and order a 7-page naturalist's dossier from GBIF and IUCN data.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0E11'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23FF6B35'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Geist:wght@400;500&display=swap">
-<link rel="stylesheet" href="scrollcraft.css">
 <style>
   :root {
-    --sc-canvas:     #0B0E11;
-    --sc-surface:    #141A1F;
-    --sc-ink:        #E9EDF0;
-    --sc-ink-soft:   #A8B3BC;
-    --sc-accent:     #FF6B35;
-    --sc-accent-ink: #0B0E11;
-    --sc-font-display: "Outfit", system-ui, sans-serif;
-    --sc-font-text:    "Geist", system-ui, sans-serif;
+    --canvas:     #0B0E11;
+    --surface:    #141A1F;
+    --line:       color-mix(in srgb, #E9EDF0 12%, transparent);
+    --ink:        #E9EDF0;
+    --ink-soft:   #A8B3BC;
+    --accent:     #FF6B35;
+    --accent-ink: #0B0E11;
+    --display: "Outfit", system-ui, sans-serif;
+    --text:    "Geist", system-ui, sans-serif;
     --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
   }
-
-  body { background: var(--sc-canvas); color: var(--sc-ink); }
-
-  /* App chrome: the console status bar replaces the marketing nav */
-  .chrome {
-    position: fixed; inset: 0 0 auto 0; z-index: 40;
-    display: flex; align-items: center; gap: var(--sc-4);
-    padding: var(--sc-3) var(--sc-gutter);
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.02em;
-    background: color-mix(in srgb, var(--sc-canvas) 82%, transparent);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid color-mix(in srgb, var(--sc-ink) 10%, transparent);
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--canvas); color: var(--ink);
+    font: 16px/1.6 var(--text);
+    min-height: 100dvh; display: flex; flex-direction: column;
   }
-  .chrome__mark { font-family: var(--sc-font-display); font-weight: 700; letter-spacing: -0.01em; }
-  .chrome__mark em { color: var(--sc-accent); font-style: normal; }
-  .chrome__status { margin-left: auto; display: flex; align-items: center; gap: var(--sc-2); color: var(--sc-ink-soft); }
-  .chrome__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--sc-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc-accent) 22%, transparent); }
-  .chrome__dot--off { background: var(--sc-ink-soft); box-shadow: none; }
 
-  /* Sections carry opaque grounds (grammar bans drift interpolation) */
-  .ground { background: var(--ground, var(--sc-canvas)); color: var(--sc-ink); }
+  /* top bar */
+  .bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12px; color: var(--ink-soft);
+  }
+  .bar__mark { font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--ink); letter-spacing: -0.01em; }
+  .bar__mark em { color: var(--accent); font-style: normal; }
+  .bar__status { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .dot--off { background: var(--ink-soft); box-shadow: none; }
 
-  .wrap { max-width: 1120px; margin-inline: auto; padding-inline: var(--sc-gutter); }
+  /* the one screen */
+  main { flex: 1; width: 100%; max-width: 640px; margin-inline: auto; padding: 28px 20px 40px; }
+  h1 {
+    font: 300 clamp(1.55rem, 5.5vw, 2.3rem)/1.2 var(--display);
+    letter-spacing: -0.02em; margin: 8px 0 6px; text-wrap: balance;
+  }
+  .sub { color: var(--ink-soft); font-size: 15.5px; margin: 0 0 24px; }
 
-  .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-ink-soft); }
-  .num { font-variant-numeric: tabular-nums; font-family: var(--mono); }
-  .acc { color: var(--sc-accent); }
+  .step { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
+  .step b { color: var(--accent); font-weight: 500; }
+  .hint { font-size: 13.5px; color: var(--ink-soft); margin: 8px 0 0; line-height: 1.55; }
+  .hint code { font-family: var(--mono); font-size: 12.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; }
 
-  /* ---------- Act 1: the console ---------- */
-  .console-hero { min-height: 100vh; display: grid; place-items: center; padding: calc(var(--sc-8) + 28px) var(--sc-gutter) var(--sc-7); }
-  .console-hero::before {
-    /* the pitch sits above the console so the first screen leads with the claim AND the surface */
-    content: "Type an address. Get the real wildlife record. Then order the dossier.";
-    grid-row: 1; margin-bottom: var(--sc-5);
-    font-family: var(--sc-font-display); font-weight: 300;
-    font-size: clamp(1.5rem, 3.2vw, 2.6rem); letter-spacing: -0.02em; line-height: 1.15;
-    text-wrap: balance; text-align: center; max-width: 22ch;
+  form { display: flex; flex-direction: column; gap: 10px; }
+  input[type="text"] {
+    width: 100%; font: 16px/1.3 var(--mono); color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 15px 16px; caret-color: var(--accent); min-height: 52px;
   }
-  .console-hero .console { grid-row: 2; }
-  @media (max-width: 700px) {
-    .console-hero { padding-top: 84px; padding-bottom: var(--sc-6); }
-    .console-hero::before { font-size: 1.45rem; margin-bottom: var(--sc-4); }
-  }
-  .console {
-    width: min(880px, 100%);
-    background: var(--sc-surface);
-    border: 1px solid color-mix(in srgb, var(--sc-ink) 12%, transparent);
-    border-radius: 14px;
-    box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.55), inset 0 1px 0 color-mix(in srgb, var(--sc-ink) 8%, transparent);
-    overflow: hidden;
-  }
-  .console__bar {
-    display: flex; align-items: center; gap: var(--sc-3);
-    padding: var(--sc-3) var(--sc-4);
-    border-bottom: 1px solid color-mix(in srgb, var(--sc-ink) 10%, transparent);
-    font-family: var(--mono); font-size: 12px; color: var(--sc-ink-soft);
-  }
-  .console__bar b { color: var(--sc-ink); font-weight: 500; }
-  .console__lamp { margin-left: auto; }
-  .console__body { padding: var(--sc-5); display: grid; gap: var(--sc-5); }
-  @media (max-width: 700px) { .console__body { padding: var(--sc-4); } }
-  .console form { display: flex; gap: var(--sc-3); flex-wrap: wrap; }
-  .console input {
-    flex: 1 1 320px; font: 15px/1 var(--mono); color: var(--sc-ink);
-    background: var(--sc-canvas); border: 1px solid color-mix(in srgb, var(--sc-ink) 18%, transparent);
-    border-radius: 8px; padding: 13px 14px; caret-color: var(--sc-accent);
-  }
-  .console input::placeholder { color: color-mix(in srgb, var(--sc-ink-soft) 70%, transparent); }
-  .console input:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 2px; }
+  input::placeholder { color: color-mix(in srgb, var(--ink-soft) 75%, transparent); }
+  input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .btn {
-    font: 500 14px/1 var(--sc-font-display); letter-spacing: 0.01em;
-    background: var(--sc-accent); color: var(--sc-accent-ink);
-    border: 0; border-radius: 8px; padding: 13px 22px; cursor: pointer;
-    transition: transform 120ms var(--sc-ease-out), filter 120ms var(--sc-ease-out);
+    font: 500 16px/1 var(--display); min-height: 52px;
+    background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: 10px; padding: 0 22px; cursor: pointer;
+    transition: transform 120ms ease-out, filter 120ms ease-out;
   }
   @media (hover: hover) and (pointer: fine) { .btn:hover { filter: brightness(1.08); } }
-  .btn:active { transform: scale(0.97); }
-  .btn:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+  .btn:active { transform: scale(0.98); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .btn[disabled] { opacity: 0.55; cursor: wait; }
+  .btn--ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
 
-  .readout { font-family: var(--mono); font-size: 13.5px; line-height: 1.7; min-height: 9.2em; overflow-wrap: anywhere; }
-  .readout__line { display: grid; grid-template-columns: 9.5em 1fr; gap: var(--sc-3); }
-  @media (max-width: 480px) { .readout__line { grid-template-columns: 1fr; gap: 0; } .readout__k { margin-top: 6px; } }
-  .readout__k { color: var(--sc-ink-soft); }
-  .readout__v b { font-weight: 500; color: var(--sc-ink); }
-  .readout__v .acc { font-weight: 500; }
-  .readout__err { color: var(--sc-accent); }
-  .readout__hint { color: var(--sc-ink-soft); }
-  .cursor { display: inline-block; width: 8px; height: 1em; background: var(--sc-accent); vertical-align: -0.1em; animation: blink 1.05s steps(1) infinite; }
+  .readout {
+    margin-top: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px 16px; font-family: var(--mono); font-size: 14px; line-height: 1.7; min-height: 96px;
+    overflow-wrap: anywhere;
+  }
+  .readout__line { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .readout__k { color: var(--ink-soft); font-size: 12px; letter-spacing: 0.06em; margin-top: 10px; }
+  .readout__line:first-child .readout__k { margin-top: 0; }
+  .readout__v { color: var(--ink); }
+  .readout__v .n { color: var(--accent); }
+  .readout__v a { color: var(--accent); }
+  .cursor { display: inline-block; width: 8px; height: 1em; background: var(--accent); vertical-align: -0.1em; animation: blink 1.05s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  @media (min-width: 480px) { .readout__line { grid-template-columns: 10.5em 1fr; gap: 12px; } .readout__k { margin-top: 0; } }
 
-  /* ---------- Act 2: your turn ---------- */
-  .try { padding-block: var(--sc-section); }
-  .try .console { width: min(760px, 100%); margin-inline: auto; }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 26px 0 18px; color: var(--ink-soft); font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-  /* ---------- Act 3: pipeline replay ---------- */
-  .replay { padding-block: var(--sc-section); }
-  .replay__grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-7); align-items: start; }
-  @media (max-width: 860px) { .replay__grid { grid-template-columns: 1fr; } }
-  .replay h2 { font-size: clamp(1.6rem, 3vw, 2.3rem); letter-spacing: -0.02em; text-wrap: balance; margin-bottom: var(--sc-4); }
-  .log { font-family: var(--mono); font-size: 12.5px; line-height: 1.9; border-left: 1px solid color-mix(in srgb, var(--sc-ink) 14%, transparent); padding-left: var(--sc-4); }
-  .log__line { display: flex; gap: var(--sc-3); opacity: 0; transform: translateY(8px); transition: opacity 260ms var(--sc-ease-out), transform 260ms var(--sc-ease-out); }
-  .log__line[data-lit] { opacity: 1; transform: none; }
-  .log__t { color: var(--sc-ink-soft); white-space: nowrap; }
-  .log__m { color: var(--sc-ink); }
-  .log__ms { margin-left: auto; color: var(--sc-accent); }
-  .replay__note { color: var(--sc-ink-soft); font-size: 14px; line-height: 1.65; max-width: 44ch; }
-  .replay__total { font-family: var(--mono); font-size: clamp(2rem, 4vw, 3rem); color: var(--sc-ink); letter-spacing: -0.02em; margin-top: var(--sc-5); }
-  .replay__total-k { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-ink-soft); }
-
-  /* trace rail: the signature move */
-  .trace { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; pointer-events: none; padding: 0 var(--sc-gutter) var(--sc-2); }
-  .trace__rail { height: 2px; background: color-mix(in srgb, var(--sc-ink) 14%, transparent); position: relative; }
-  .trace__fill { position: absolute; inset: 0 auto 0 0; width: 0%; background: var(--sc-accent); }
-  .trace__marks { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: var(--sc-ink-soft); }
-  .trace__marks span[data-stamped] { color: var(--sc-accent); }
-  @media (max-width: 700px) { .trace__marks span:nth-child(even) { display: none; } }
-
-  /* ---------- Act 4: plates rail (peak) ---------- */
-  .plates { padding-block: var(--sc-section); overflow-x: clip; }
-  .plates__lead { max-width: 640px; margin-bottom: var(--sc-6); padding-inline: var(--sc-gutter); }
-  .plates h2 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); letter-spacing: -0.02em; text-wrap: balance; }
-  .plates__rail { display: flex; gap: var(--sc-5); width: max-content; padding-right: var(--sc-9); }
-  .plate { flex: 0 0 auto; width: clamp(300px, 34vw, 460px); }
-  .plate figure { border: 1px solid color-mix(in srgb, var(--sc-ink) 12%, transparent); border-radius: 10px; overflow: hidden; background: var(--sc-surface); }
-  .plate img { width: 100%; height: auto; display: block; }
-  .plate figcaption { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--sc-ink-soft); padding: 10px 2px 0; }
-  .plate--crane { width: min(640px, 86vw); }
-  .crane-caption { font-size: clamp(1.05rem, 1.6vw, 1.3rem); line-height: 1.5; max-width: 30ch; text-wrap: balance; }
-  .plate .num { font-family: var(--mono); color: var(--sc-accent); font-size: 12px; margin-right: 8px; }
-
-  /* ---------- Act 5: method ---------- */
-  .method { padding-block: var(--sc-section); }
-  .method__grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--sc-8); }
-  @media (max-width: 860px) { .method__grid { grid-template-columns: 1fr; } }
-  .method h2 { font-size: clamp(1.6rem, 3vw, 2.3rem); letter-spacing: -0.02em; text-wrap: balance; margin-bottom: var(--sc-4); }
-  .method p { max-width: 58ch; }
-  .method__facts { display: grid; gap: var(--sc-4); align-content: start; }
-  .fact { border-top: 1px solid color-mix(in srgb, var(--sc-ink) 12%, transparent); padding-top: var(--sc-3); }
-  .fact__n { font-family: var(--mono); font-size: clamp(1.6rem, 2.6vw, 2.2rem); font-variant-numeric: tabular-nums; }
-  .fact__k { color: var(--sc-ink-soft); font-size: 13.5px; margin-top: 2px; }
-  .fact__l { color: var(--sc-ink-soft); font-size: 13.5px; margin-top: 2px; }
-
-  /* ---------- Act 6: order (the close is an actual input) ---------- */
-  .order { padding-block: var(--sc-section); }
-  .order .console { width: min(720px, 100%); }
-  .order__foot { font-family: var(--mono); font-size: 11.5px; color: var(--sc-ink-soft); margin-top: var(--sc-4); line-height: 1.8; }
-  .jobline { font-family: var(--mono); font-size: 13px; color: var(--sc-accent); }
-
-  footer.site-foot { padding: var(--sc-7) var(--sc-gutter) calc(var(--sc-7) + 72px); color: color-mix(in srgb, var(--sc-ink-soft) 78%, var(--sc-ink)); font-family: var(--mono); font-size: 12px; }
-
-  /* trace rail overlaps the page bottom; give the last section clearance */
-  .ground:last-of-type { padding-bottom: calc(var(--sc-section) + 40px); }
+  footer { padding: 18px 20px calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); color: var(--ink-soft); font-family: var(--mono); font-size: 12px; line-height: 1.8; }
+  footer a { color: var(--ink); }
 </style>
 </head>
 <body>
 
-<span data-sc-progress></span>
-<div class="sc-grain" aria-hidden="true"></div>
-
-<header class="chrome">
-  <span class="chrome__mark">Wild<em>Deed</em></span>
-  <span class="chrome__status" id="api-status"><span class="chrome__dot chrome__dot--off" aria-hidden="true"></span>checking api</span>
+<header class="bar">
+  <span class="bar__mark">Wild<em>Deed</em></span>
+  <span class="bar__status" id="api-status"><span class="dot dot--off" aria-hidden="true"></span>checking api…</span>
 </header>
 
-<main id="top">
+<main>
+  <h1>The wildlife record of any piece of land.</h1>
+  <p class="sub">Public biodiversity data (GBIF + IUCN), run live against any US address.</p>
 
-  <!-- 1 · COMPETENCE: the console, already running. Hero = the surface in a state. -->
-  <section class="ground console-hero" style="--ground:#0B0E11" data-sc-act="flow">
-    <div class="sc-wrap" style="width:100%; display:grid; place-items:center;" data-sc-in data-sc-stagger="0">
-      <div class="console">
-        <div class="console__bar">
-          <b>wilddeed console</b>
-          <span>v0.2 · GBIF + IUCN · live</span>
-          <span class="console__lamp num" id="hero-lamp"></span>
-        </div>
-        <div class="console__body">
-          <form id="hero-form" autocomplete="off">
-            <label class="label" for="hero-address">Parcel address</label>
-            <input id="hero-address" name="address" type="text" inputmode="text"
-                   placeholder="e.g. W1215 County Road B, Babcock, WI 54413" required>
-            <button class="btn" type="submit">Run lookup</button>
-          </div>
-          <div class="readout" id="hero-readout" aria-live="polite">
-            <div class="readout__line"><span class="readout__k">status</span><span class="readout__v">querying the live engine<span class="cursor"></span></span></div>
-            <div class="readout__line"><span class="readout__k">location</span><span class="readout__v num">44.3350, -90.1306 · sample run</span></div>
-            <div class="readout__line"><span class="readout__k">gbif records</span><span class="readout__v num" data-sc-count="0 2,000" data-sc-count-at="0.02 0.3">0</span></div>
-            <div class="readout__line"><span class="readout__k">species</span><span class="readout__v num" data-sc-count="0 384" data-sc-count-at="0.04 0.4">0</span></div>
-            <div class="readout__line"><span class="readout__k">top observed</span><span class="readout__v num">live query in flight…</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- STEP 1 -->
+  <p class="step"><b>Step 1</b> · type the parcel's address</p>
+  <form id="f" autocomplete="off">
+    <input id="addr" type="text" inputmode="text" required
+           placeholder="W1215 County Road B, Babcock, WI 54413"
+           aria-label="Parcel address: street, city, state">
+    <button class="btn" type="submit" id="run">Run free lookup</button>
+  </form>
+  <p class="hint">Format: <code>street, city, state</code> — a ZIP works too. Rural roads and township addresses are fine; if one geocoder misses, a second one catches it.</p>
 
-  <!-- 2 · CURIOSITY: your turn. Same surface, your address. -->
-  <section class="ground try" style="--ground:#0D1116" data-sc-act="flow">
-    <div class="sc-wrap sc-stack" data-sc-in data-sc-stagger="60">
-      <h2 class="sc-display sc-display--md" style="font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.02em;">Your land. Your record.</h2>
-      <p class="sc-body">Any US address works: a farm, a hunting lease, forty acres you are considering. The lookup above is the same engine brokers get, running free, right here.</p>
-    </div>
-    <div class="console" data-sc-in style="margin-top: var(--sc-5)">
-      <div class="console__body">
-        <form id="try-form" autocomplete="off" style="display:grid; gap: var(--sc-3)">
-          <label class="label" for="try-address" style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-ink-soft);">Try your own address</label>
-          <div style="display:flex; gap: 10px; flex-wrap: wrap;">
-            <input id="try-address" style="flex:1 1 300px" required placeholder="address, city, state">
-            <button class="btn" type="submit">Run lookup</button>
-          </div>
-          <div class="readout" style="min-height: 4.2em" id="try-readout" aria-live="polite">
-            <span class="readout__v" style="color: var(--sc-ink-soft)">The surface is live. Nothing here is a demo recording.</span>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
+  <!-- STEP 2 -->
+  <div class="readout" id="out" aria-live="polite">
+    <div class="readout__line"><span class="readout__k">status</span><span class="readout__v">waiting for an address<span class="cursor"></span></span></div>
+  </div>
+  <p class="hint" id="step2-hint" hidden><b style="color:var(--accent)">Step 2</b> · that's the real record, straight from GBIF. Happy with it? Generate the full dossier below.</p>
 
-  <!-- 3 · CLARITY: the pipeline replay. Scroll is the playhead over the real production run. -->
-  <section class="ground replay" style="--ground:#0D1114" data-sc-act="pin" data-sc-span="3.2" id="replay">
-    <div data-sc-stage class="replay__grid">
-      <div>
-        <h2 data-sc-cue="0 0.2 0">How a dossier is actually made.</h2>
-        <p class="sc-body" data-sc-cue="0.06 0.3">
-          Not a diagram. This is the production log of dossier <span class="num acc">0e5ad70c</span>,
-          generated for a real Wood County parcel on August 29, 2026. Scroll replays it, stage by
-          stage, with the real measured durations. Nothing about the process is hidden, because the
-          process is the credibility.
-        </p>
-        <p class="sc-body" data-sc-cue="0.5 0.85">
-          Every number in a WildDeed dossier traces to a named source: occurrence records from GBIF,
-          conservation status from the IUCN Red List, geocoding from the US Census. The narrative is
-          written by an LLM and then validated line by line against the data, so invented species
-          never survive to the PDF.
-        </p>
-      </div>
-      <div class="log" id="replay-log" aria-label="Pipeline log replay">
-        <!-- lines injected by page script, driven by --sc-p -->
-      </div>
-    </div>
-  </section>
+  <div class="divider">or</div>
 
-  <!-- 4 · WEIGHT: the field guide rail (peak). The plates travel like a specimen drawer. -->
-  <section class="ground plates" style="--ground:#101418" data-sc-act="pan" data-sc-span="4.2">
-    <div data-sc-stage>
-      <div class="plates__rail" data-sc-pan="0.06">
-        <div class="plates__lead">
-          <h2>What 518 species<br>looks like.</h2>
-          <p class="sc-body">One parcel. Eight kilometres. Fifteen years of public records,
-          distilled into a field guide that reads like a naturalist wrote it, because one did.</p>
-        </div>
-        <figure class="plate">
-          <img src="static/img/ch1-land.webp" width="1600" height="900" alt="Watercolor of a Wisconsin hunting parcel at first light" loading="lazy">
-          <figcaption><span class="num">I</span> The parcel · 8 km radius surveyed</figcaption>
-        </figure>
-        <figure class="plate">
-          <img src="static/img/ch2-dossier.webp" width="1600" height="900" alt="Watercolor of a naturalist's journal open on a table" loading="lazy">
-          <figcaption><span class="num">II</span> The method · 92,840 records examined</figcaption>
-        </figure>
-        <figure class="plate plate--crane">
-          <img src="static/img/ch3-crane.webp" width="1600" height="900" alt="Watercolor of a whooping crane standing in shallow water" loading="lazy">
-          <figcaption><span class="num">III</span> The whooping crane · 7 records · IUCN Endangered</figcaption>
-        </figure>
-        <figure class="plate">
-          <img src="static/img/ch5b-buck.webp" width="1600" height="900" alt="Watercolor of a white-tailed buck in a forest clearing" loading="lazy">
-          <figcaption><span class="num">IV</span> White-tailed deer · 39 records · game species</figcaption>
-        </figure>
-        <figure class="plate">
-          <img src="static/img/ch4-plates.webp" width="1600" height="900" alt="Watercolor of field guide bird plates" loading="lazy">
-          <figcaption><span class="num">V</span> The plates · 518 species catalogued</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- 5 · CONFIDENCE: the method, plain document energy -->
-  <section class="ground method" style="--ground:#0D1114" data-sc-act="flow">
-    <div class="sc-wrap method__grid">
-      <div class="sc-stack" data-sc-in data-sc-stagger="60">
-        <h2>Built on sources you can check.</h2>
-        <p class="sc-body">
-          WildDeed queries GBIF, the Global Biodiversity Information Facility: over two billion
-          occurrence records from museums, citizen scientists, and field surveys. Conservation status
-          comes from the IUCN Red List. Geocoding comes from the US Census Bureau.
-        </p>
-        <p class="sc-body">
-          Every dossier states its limits on its face: this is a records synthesis, not a biological
-          survey. Absence of a species in the data is not proof of absence on the land. That honesty
-          is why brokers put their name on it.
-        </p>
-      </div>
-      <div class="method__stats" data-sc-in data-sc-stagger="90">
-        <div class="fact"><div class="fact__n num" data-sc-count="0 92,840" data-sc-count-at="0.05 0.5">0</div><div class="fact__k">records in the sample dossier</div></div>
-        <div class="fact"><div class="fact__n num" data-sc-count="0 518">0</div><div class="fact__l">species, deduplicated</div></div>
-        <div class="fact"><div class="fact__n num" data-sc-count="0 15">0</div><div class="fact__l">years of occurrence data (2011-2026)</div></div>
-        <div class="fact"><div class="fact__n num" data-sc-count="0 7">0</div><div class="fact__l">pages in the PDF, cover art included</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6 · READINESS: the close is an actual input -->
-  <section class="ground order" style="--ground:#0B0E11" data-sc-act="pin" data-sc-span="1.6" id="order">
-    <div data-sc-stage>
-      <div class="console order__console">
-        <div class="console__bar"><b>order a dossier</b><span class="console__lamp" id="order-lamp"></span></div>
-        <div class="console__body">
-          <form id="order-form" autocomplete="off">
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <input id="order-address" required style="flex:1 1 280px" placeholder="the parcel's address">
-              <button class="btn" type="submit">Generate dossier</button>
-            </div>
-            <p class="sc-body" id="order-readout" style="font-family: var(--mono); font-size: 12.5px; color: var(--sc-ink-soft); margin-top: 12px; min-height: 3.4em;">
-              The full dossier: 7-page PDF, narrative, cover art. About 90 seconds. $49, first one free.
-            </p>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  <!-- STEP 3 -->
+  <p class="step"><b>Step 3</b> · order the full dossier</p>
+  <form id="d" autocomplete="off">
+    <button class="btn btn--ghost" type="submit" id="gen" disabled>Generate 7-page dossier (PDF) · ~90 s · first one free</button>
+  </form>
+  <p class="hint">Runs the same engine plus IUCN status, a written narrative, and cover art — delivered as a PDF. Run the free lookup first; this uses the address above.</p>
 </main>
 
-<footer class="site-foot">
-  WildDeed · generated from public biodiversity records (GBIF) and IUCN Red List data ·
-  not a biological survey · <a href="https://github.com/vivmuk/wilddeed" style="color: var(--sc-ink)">vivmuk/wilddeed</a>
+<footer>
+  WildDeed · generated from public biodiversity records (GBIF) and IUCN Red List data · not a biological survey ·
+  <a href="https://github.com/vivmuk/wilddeed">vivmuk/wilddeed</a>
 </footer>
 
-<!-- trace rail: the signature move's chrome -->
-<div class="trace" aria-hidden="true">
-  <div class="trace__rail"><div class="trace__fill" id="trace-fill"></div></div>
-  <div class="trace__marks" id="trace-marks">
-    <span>console</span><span>lookup</span><span>pipeline</span><span>plates</span><span>method</span><span>order</span>
-  </div>
-</div>
-
-<script src="scrollcraft.js"></script>
 <script>
-ScrollCraft.mount(document.body);
+const API = "";
 
-const API = location.hostname === "localhost" || location.hostname === "127.0.0.1"
-  ? "https://wilddeed-production.up.railway.app"
-  : "";
-
-/* ---- chrome: real API status ---- */
+/* chrome status */
 (async () => {
   const el = document.getElementById("api-status");
   try {
     const r = await fetch(API + "/healthz", { signal: AbortSignal.timeout(5000) });
     const ok = r.ok && (await r.json()).ok;
-    el.innerHTML = '<span class="chrome__dot' + (ok ? '' : ' chrome__dot--off') + '"></span>' + (ok ? "api live" : "api down");
-  } catch { el.innerHTML = '<span class="chrome__dot chrome__dot--off"></span>api unreachable'; }
+    el.innerHTML = '<span class="dot' + (ok ? '' : ' dot--off') + '"></span>' + (ok ? "api live" : "api down");
+  } catch { el.innerHTML = '<span class="dot dot--off"></span>api unreachable'; }
 })();
 
-/* ---- readout rendering, shared by both consoles ---- */
-function fill(readout, d) {
-  const top = (d.top || []).slice(0, 4)
-    .map(s => (s.common || s.scientific) + " · " + s.records)
-    .join(" / ");
-  readout.querySelector("#hero-top, #try-top")?.replaceChildren(
-    Object.assign(document.createElement("span"), { textContent: top || "no records in radius" })
-  );
-}
-function renderResult(readout, d, addr) {
-  readout.innerHTML = [
-    ["status",    "complete · " + (d.matched || addr).slice(0, 52)],
-    ["location",  d.lat.toFixed(4) + ", " + d.lon.toFixed(4)],
-    ["gbif records", Number(d.total_records).toLocaleString("en-US") + " within radius"],
-    ["species",   Number(d.species_count).toLocaleString("en-US") + " distinct"],
-    ["top observed", (d.top || []).slice(0, 4).map(s => s.common + " (" + s.records + ")").join(" · ")],
-  ].map(([k, v]) => `<div class="readout__line"><span class="readout__k">${k}</span><span class="readout__v num">${v}</span></div>`).join("");
-}
-function renderError(readout, msg) {
-  readout.innerHTML = `<div class="readout__line"><span class="readout__k">status</span><span class="readout__v">error</span></div>
-  <div class="readout__line"><span class="readout__k">detail</span><span class="readout__v">${msg}</span></div>`;
+const out = document.getElementById("out");
+const addrEl = document.getElementById("addr");
+const genBtn = document.getElementById("gen");
+const step2 = document.getElementById("step2-hint");
+let lastAddr = "";
+
+function rows(pairs) {
+  return pairs.map(([k, v]) =>
+    `<div class="readout__line"><span class="readout__k">${k}</span><span class="readout__v">${v}</span></div>`).join("");
 }
 
-/* ---- Act 1: the console runs on arrival (greet state, before any input) ---- */
-const heroReadout = document.getElementById("hero-readout");
-const HERO_ADDR = "County Road B, Babcock, Wood County, Wisconsin";
-(async () => {
+/* Step 1: free lookup */
+document.getElementById("f").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const addr = addrEl.value.trim();
+  if (!addr) return;
+  lastAddr = addr;
+  genBtn.disabled = true;
+  out.innerHTML = rows([["status", "querying GBIF for " + addr.slice(0, 48) + "…"]]);
   try {
     const r = await fetch(API + "/api/species", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: HERO_ADDR, radius: 8 }) });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    renderResult(heroReadout, await r.json(), HERO_ADDR);
+      body: JSON.stringify({ address: addr, radius: 8 }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.detail || ("HTTP " + r.status)); }
+    const d = await r.json();
+    const top = (d.top || []).slice(0, 4).map(s => s.common + " (" + s.records + ")").join(" · ");
+    out.innerHTML = rows([
+      ["status",     "complete"],
+      ["matched",    (d.matched || addr).slice(0, 60)],
+      ["location",   d.lat.toFixed(4) + ", " + d.lon.toFixed(4)],
+      ["gbif records", '<span class="n">' + Number(d.total_records).toLocaleString("en-US") + "</span> within 8 km"],
+      ["species",    '<span class="n">' + Number(d.species_count).toLocaleString("en-US") + "</span> distinct"],
+      ["top observed", top || "none listed in radius"],
+    ]);
+    step2.hidden = false;
+    genBtn.disabled = false;
   } catch (e) {
-    /* keep the greet state's numbers (they are the real sample run) and mark the live query as failed */
-    const s = heroReadout.querySelector(".readout__v");
-    if (s) s.innerHTML = "live query failed · showing the last real run";
+    out.innerHTML = rows([
+      ["status", "lookup failed"],
+      ["detail", String(e.message || e)],
+      ["retry", "check the address format, or try adding the ZIP code"],
+    ]);
   }
-})();
-
-/* ---- the two input forms (hero + your-turn + order) all hit the real API ---- */
-function wire(formId, inputId, readoutId, mode) {
-  const form = document.getElementById(formId);
-  const input = document.getElementById(inputId);
-  const readout = document.getElementById(readoutId);
-  form?.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const addr = input.value.trim();
-    if (!addr) return;
-    if (mode === "dossier") {
-      readout.innerHTML = `<div class="readout__line"><span class="readout__k">status</span><span class="readout__v num">queued · generating 7-page dossier…</span></div>`;
-      try {
-        const r = await fetch(API + "/api/dossiers", { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address: addr, radius: 8 }) });
-        const j = await r.json();
-        const jid = j.id;
-        readout.innerHTML = `<div class="readout__line"><span class="readout__k">job</span><span class="readout__v num acc">${jid}</span></div>
-          <div class="readout__line"><span class="readout__k">status</span><span class="readout__v num">running · geocode → GBIF → IUCN → narrative → PDF</span></div>`;
-        for (let i = 0; i < 40; i++) {
-          await new Promise(res => setTimeout(res, 5000));
-          const s = await fetch(API + "/api/dossiers/" + jid).then(r => r.json());
-          if (s.status === "done") {
-            readout.innerHTML = `<div class="readout__line"><span class="readout__k">job</span><span class="readout__v num acc">${jid}</span></div>
-              <div class="readout__line"><span class="readout__k">status</span><span class="readout__v">complete</span></div>
-              <div class="readout__line"><span class="readout__k">download</span><span class="readout__v"><a href="${API}/api/dossiers/${jid}/pdf" target="_blank" rel="noopener">Download the dossier (PDF)</a></span></div>`;
-            return;
-          }
-          if (s.status === "error") { renderError(readout, s.error || "generation failed"); return; }
-        }
-        renderError(readout, "timed out · the dossier is still generating, refresh in a minute");
-      } catch (e) { renderError(readout, String(e)); }
-      return;
-    }
-    readout.innerHTML = `<div class="readout__line"><span class="readout__k">status</span><span class="readout__v num">querying GBIF…</span></div>`;
-    try {
-      const r = await fetch(API + "/api/species", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: addr, radius: 8 }) });
-      if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.detail || ("HTTP " + r.status)); }
-      renderResult(readout, await r.json(), addr);
-    } catch (e) { renderError(readout, String(e)); }
-  });
-}
-wire("hero-form", "hero-address", "hero-readout", "species");
-wire("try-form", "try-address", "try-readout", "species");
-wire("order-form", "order-address", "order-readout", "dossier");
-
-/* ---- Act 3: the pipeline replay (signature move). Real log of dossier 0e5ad70c. ---- */
-const RUN = [
-  { t: "0.0s",  m: "job accepted · Babcock Parcel · radius 8 km",            ms: null,  at: 0.00 },
-  { t: "0.1s",  m: "geocode: Census → 44.3350, -90.1306 (Wood County, WI)",  ms: 100,   at: 0.08 },
-  { t: "2.6s",  m: "GBIF: 29,371 records within 8 km (≥2011)",               ms: 2500,  at: 0.18 },
-  { t: "18.4s", m: "species normalize: 384 candidates → 15 flagged",         ms: 15800, at: 0.34 },
-  { t: "41.0s", m: "IUCN Red List enrich: status per species",               ms: 22600, at: 0.52 },
-  { t: "66.2s", m: "narrative: Venice LLM, validated against the data",      ms: 25200, at: 0.68 },
-  { t: "88.9s", m: "cover art: naturalist plate, Venice image gen",          ms: 22700, at: 0.84 },
-  { t: "92.3s", m: "PDF: 7 pages, 5.2 MB → wilddeed-0e5ad70c.pdf",           ms: 3400,  at: 0.96 },
-];
-const TOTAL = 92300;
-const log = document.getElementById("replay-log");
-RUN.forEach(l => {
-  const row = document.createElement("div");
-  row.className = "log__line";
-  row.innerHTML = `<span class="log__t">${l.t}</span><span class="log__m">${l.m}</span>` + (l.ms ? `<span class="log__ms num">+${(l.ms/1000).toFixed(1)}s</span>` : "");
-  log.appendChild(row);
 });
-const totalRow = document.createElement("div");
-totalRow.className = "log__line log__line--total";
-totalRow.innerHTML = `<span class="log__t"></span><span class="log__m">wall clock</span><span class="log__ms num">${(TOTAL/1000).toFixed(1)}s</span>`;
-log.appendChild(totalRow);
 
-/* scroll-driven replay: each line stamps when the act's --sc-p passes its mark */
-const replayAct = document.getElementById("replay");
-const logRows = () => log.querySelectorAll(".log__line");
-function paintReplay() {
-  const p = parseFloat(getComputedStyle(replayAct).getPropertyValue("--sc-p") || 0);
-  logRows().forEach((row, i) => {
-    const mark = RUN[i] ? RUN[i].at : 0.97;             // total row stamps at the end
-    if (p >= mark) row.setAttribute("data-stamped", "");
-  });
-}
-addEventListener("scroll", () => requestAnimationFrame(paintReplay), { passive: true });
-paintReplay();
+/* Step 3: dossier */
+document.getElementById("d").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  if (!lastAddr) return;
+  genBtn.disabled = true;
+  out.innerHTML = rows([["status", "queuing dossier for " + lastAddr.slice(0, 48) + "…"]]);
+  try {
+    const r = await fetch(API + "/api/dossiers", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address: lastAddr, radius: 8 }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.detail || ("HTTP " + r.status)); }
+    const j = await r.json();
+    out.innerHTML = rows([
+      ["job",       '<span class="n">' + j.id + "</span>"],
+      ["status",    "running · geocode → GBIF → IUCN → narrative → PDF"],
+      ["wait",      "about 90 seconds — this page will update"],
+    ]);
+    for (let i = 0; i < 60; i++) {
+      await new Promise(res => setTimeout(res, 5000));
+      const s = await fetch(API + "/api/dossiers/" + j.id).then(r => r.json());
+      if (s.status === "done") {
+        out.innerHTML = rows([
+          ["job",     '<span class="n">' + j.id + "</span>"],
+          ["status",  "complete"],
+          ["download", '<a href="' + API + "/api/dossiers/" + j.id + '/pdf" target="_blank" rel="noopener">Open your dossier (PDF)</a>'],
+        ]);
+        genBtn.disabled = false;
+        return;
+      }
+      if (s.status === "error") {
+        out.innerHTML = rows([["status", "generation failed"], ["detail", s.error || "unknown error"]]);
+        genBtn.disabled = false;
+        return;
+      }
+    }
+    out.innerHTML = rows([["status", "still generating — refresh this page in a minute and re-run"]]);
+    genBtn.disabled = false;
+  } catch (e) {
+    out.innerHTML = rows([["status", "order failed"], ["detail", String(e.message || e)]]);
+    genBtn.disabled = false;
+  }
+});
 </script>
 </body>
 </html>
