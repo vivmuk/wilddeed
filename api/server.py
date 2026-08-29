@@ -36,14 +36,21 @@ def run_job(job_id: str, order: Order):
     job = JOBS[job_id]
     job.update(status="running", started=time.time())
     try:
+        # Geocode HERE (Census -> Nominatim fallback) instead of inside generate_report:
+        # the engine's geocoder has no rural fallback and exits hard (SystemExit) on no-match.
+        geo = geocode_any(order.address)
+        if not geo:
+            raise RuntimeError("address not found (Census and Nominatim both returned no match)")
+        job.update(geo={"lat": geo["lat"], "lng": geo["lng"], "matched": geo.get("matched_address")})
         result = wilddeed.generate_report(
-            address=order.address,
+            address=None,  # skip internal geocoding; pass coords directly
+            lat=geo["lat"], lng=geo["lng"],
             radius_km=order.radius,
             title=order.title or order.address,
             out_dir=str(ROOT / "reports"),
         )
         job.update(status="done", finished=time.time(), **result)
-    except Exception as e:
+    except BaseException as e:  # SystemExit and friends must not silently kill the worker
         job.update(status="error", error=f"{type(e).__name__}: {e}", finished=time.time())
 
 @app.post("/api/dossiers")
