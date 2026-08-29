@@ -1,0 +1,983 @@
+{
+  "doc": {
+    "height": 10431,
+    "vh": 900,
+    "acts": [
+      "flow",
+      "flow",
+      "pin",
+      "pan",
+      "flow",
+      "pin"
+    ],
+    "world": null
+  },
+  "report": [
+    {
+      "i": 0,
+      "y": 0,
+      "pct": 0,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        1639,
+        4519,
+        8933
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 1,
+      "y": 30,
+      "pct": 0,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        1609,
+        4489,
+        8903
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 2,
+      "y": 173,
+      "pct": 2,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        1466,
+        4346,
+        8760
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 3,
+      "y": 320,
+      "pct": 3,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        1319,
+        4199,
+        8613
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 4,
+      "y": 518,
+      "pct": 5,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        1121,
+        4001,
+        8415
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 5,
+      "y": 610,
+      "pct": 6,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        1029,
+        3909,
+        8323
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 6,
+      "y": 864,
+      "pct": 9,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "How a dossier is actually made.",
+          "dir": "light-on-dark",
+          "worst": 16.11,
+          "mean": 16.11
+        }
+      ],
+      "cues": [
+        {
+          "t": "How a dossier is actually made.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        775,
+        3655,
+        8069
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 7,
+      "y": 899,
+      "pct": 9,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "How a dossier is actually made.",
+          "dir": "light-on-dark",
+          "worst": 16.11,
+          "mean": 16.11
+        }
+      ],
+      "cues": [
+        {
+          "t": "How a dossier is actually made.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        740,
+        3620,
+        8034
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 8,
+      "y": 1189,
+      "pct": 12,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "How a dossier is actually made.",
+          "dir": "light-on-dark",
+          "worst": 16.11,
+          "mean": 16.11
+        }
+      ],
+      "cues": [
+        {
+          "t": "How a dossier is actually made.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        450,
+        3330,
+        7744
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 9,
+      "y": 1479,
+      "pct": 16,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "How a dossier is actually made.",
+          "dir": "light-on-dark",
+          "worst": 16.11,
+          "mean": 16.11
+        }
+      ],
+      "cues": [
+        {
+          "t": "How a dossier is actually made.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        160,
+        3040,
+        7454
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 10,
+      "y": 1549,
+      "pct": 16,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "How a dossier is actually made.",
+          "dir": "light-on-dark",
+          "worst": 16.11,
+          "mean": 16.11
+        }
+      ],
+      "cues": [
+        {
+          "t": "How a dossier is actually made.",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        90,
+        2970,
+        7384
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 11,
+      "y": 1929,
+      "pct": 20,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Not a diagram. This is the production lo",
+          "dir": "light-on-dark",
+          "worst": 8.88,
+          "mean": 8.88
+        }
+      ],
+      "cues": [
+        {
+          "t": "Not a diagram. This is the production log of d",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        0,
+        2590,
+        7004
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 12,
+      "y": 2309,
+      "pct": 24,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        0,
+        2210,
+        6624
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 13,
+      "y": 2689,
+      "pct": 28,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Every number in a WildDeed dossier trace",
+          "dir": "light-on-dark",
+          "worst": 8.88,
+          "mean": 8.88
+        }
+      ],
+      "cues": [
+        {
+          "t": "Every number in a WildDeed dossier traces to a",
+          "o": 0.98
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        0,
+        1830,
+        6244
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 14,
+      "y": 3069,
+      "pct": 32,
+      "settled": true,
+      "contrast": [],
+      "cues": [
+        {
+          "t": "Every number in a WildDeed dossier traces to a",
+          "o": 0.64
+        }
+      ],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        0,
+        1450,
+        5864
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 15,
+      "y": 3449,
+      "pct": 36,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        0
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -90,
+        1070,
+        5484
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 16,
+      "y": 4447,
+      "pct": 47,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -49
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -1088,
+        72,
+        4486
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 17,
+      "y": 5000,
+      "pct": 52,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -516
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -1641,
+        0,
+        3933
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 18,
+      "y": 5553,
+      "pct": 58,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -984
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -2194,
+        0,
+        3380
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 19,
+      "y": 6106,
+      "pct": 64,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -1451
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -2747,
+        0,
+        2827
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 20,
+      "y": 6659,
+      "pct": 70,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -1918
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -3300,
+        0,
+        2274
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 21,
+      "y": 7211,
+      "pct": 76,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2385
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -3852,
+        -72,
+        1722
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 22,
+      "y": 7300,
+      "pct": 77,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -3941,
+        -161,
+        1633
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 23,
+      "y": 7594,
+      "pct": 80,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pan",
+      "stages": [
+        -4235,
+        -455,
+        1339
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 24,
+      "y": 7889,
+      "pct": 83,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        -4530,
+        -750,
+        1044
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 25,
+      "y": 8184,
+      "pct": 86,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "flow",
+      "stages": [
+        -4825,
+        -1045,
+        749
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 26,
+      "y": 8479,
+      "pct": 89,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5120,
+        -1340,
+        454
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 27,
+      "y": 8773,
+      "pct": 92,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5414,
+        -1634,
+        160
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 28,
+      "y": 8815,
+      "pct": 92,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5456,
+        -1676,
+        118
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 29,
+      "y": 8918,
+      "pct": 94,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5559,
+        -1779,
+        15
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 30,
+      "y": 9022,
+      "pct": 95,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5663,
+        -1883,
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 31,
+      "y": 9126,
+      "pct": 96,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5767,
+        -1987,
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 32,
+      "y": 9229,
+      "pct": 97,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5870,
+        -2090,
+        -55
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 33,
+      "y": 9333,
+      "pct": 98,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -5974,
+        -2194,
+        -159
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    },
+    {
+      "i": 34,
+      "y": 9531,
+      "pct": 100,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [
+        -2434
+      ],
+      "wipes": [],
+      "act": "pin",
+      "stages": [
+        -6172,
+        -2392,
+        -357
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0B0E11"
+    }
+  ],
+  "consoleErrors": [],
+  "failed": []
+}
