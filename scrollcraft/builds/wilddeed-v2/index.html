@@ -183,7 +183,7 @@ document.getElementById("f").addEventListener("submit", async (ev) => {
     const top = (d.top || []).slice(0, 4).map(s => s.common + " (" + s.records + ")").join(" · ");
     out.innerHTML = rows([
       ["status",     "complete"],
-      ["matched",    (d.matched || addr).slice(0, 60)],
+      ["matched",    (d.matched || addr)],
       ["location",   d.lat.toFixed(4) + ", " + d.lon.toFixed(4)],
       ["gbif records", '<span class="n">' + Number(d.total_records).toLocaleString("en-US") + "</span> within 8 km"],
       ["species",    '<span class="n">' + Number(d.species_count).toLocaleString("en-US") + "</span> distinct"],
